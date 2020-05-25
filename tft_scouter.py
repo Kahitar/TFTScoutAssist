@@ -1,4 +1,9 @@
+import copy
 import tkinter as tk
+
+class CircularBuffer():
+	def __init__(self):
+		pass
 
 class GameFrame(tk.Frame):
 	def __init__(self, parent, game):
@@ -6,12 +11,14 @@ class GameFrame(tk.Frame):
 		
 		self.game = game
 
-		self.main_frame = tk.Frame(self)
-		self.main_frame.grid(row=0, column=0)
+		self.main_frame = tk.Frame(self, height=210, width=250, bg="orange")
+		self.main_frame.grid(row=0, column=0, sticky="nsew", padx=(5,0), pady=(5,0))
+		self.main_frame.grid_propagate(False)
 
-		self.options_frame = tk.Frame(self)
-		self.options_frame.grid(row=1, column=0)
-		tk.Button(self.options_frame, text="Reset", command=self.reset).grid(row=0, column=0)
+		self.options_frame = tk.Frame(self, bg="red")
+		self.options_frame.grid(row=1, column=0, sticky="nsew", padx=(5,0), pady=(5,0))
+		tk.Button(self.options_frame, text="Reset played", command=self.reset).grid(row=0, column=0, sticky="n")
+		tk.Button(self.options_frame, text="Revive all", command=self.revive_all).grid(row=0, column=1, sticky="n")
 
 		self.player_buttons = dict()
 		self.delete_buttons = dict()
@@ -19,8 +26,8 @@ class GameFrame(tk.Frame):
 			self.player_buttons[player_idx] = tk.Button(self.main_frame, text=player_name, command=lambda player_idx=player_idx: self.played_player(player_idx))
 			self.delete_buttons[player_idx] = tk.Button(self.main_frame, text="X", bg="red", command=lambda player_idx=player_idx: self.delete_player(player_idx))
 
-		tk.Label(self.main_frame, text="POSSIBLE OPPONENTS:", bg="#99ff99").grid(row=0, column=0, columnspan=2, sticky="nsew")
-		tk.Label(self.main_frame, text="LAST PLAYED:", bg="#99ff99").grid(row=0, column=2, columnspan=2, sticky="nsew", padx=(5,0))
+		tk.Label(self.main_frame, text="POSSIBLE OPPONENTS", bg="#99ff99").grid(row=0, column=0, columnspan=2, sticky="nsew")
+		tk.Label(self.main_frame, text="LAST PLAYED", bg="#99ff99").grid(row=0, column=2, columnspan=2, sticky="nsew", padx=(5,0))
 
 		self.update_info()
 
@@ -31,18 +38,17 @@ class GameFrame(tk.Frame):
 
 	def delete_player(self, player_idx):
 		self.game.player_died(player_idx)
-
 		self.player_buttons[player_idx].grid_forget()
-		del self.player_buttons[player_idx]
-
 		self.delete_buttons[player_idx].grid_forget()
-		del self.delete_buttons[player_idx]
 		
 		self.update_info()
 
 	def reset(self):
 		self.game.reset()
+		self.update_info()
 
+	def revive_all(self):
+		self.game.revive_all()
 		self.update_info()
 
 	def update_info(self):
@@ -54,43 +60,57 @@ class GameFrame(tk.Frame):
 
 		for i, opponent in enumerate(self.game.get_possible_opponents()):
 			self.player_buttons[opponent].grid(row=i+1, column=0, sticky="nsew")
+			self.player_buttons[opponent]["state"] = tk.NORMAL
 			self.delete_buttons[opponent].grid(row=i+1, column=1)
 
 		for i, opponent in enumerate(self.game.get_played_opponents()):
 			self.player_buttons[opponent].grid(row=i+1, column=2, sticky="nsew", padx=(5,0))
+			self.player_buttons[opponent]["state"] = tk.DISABLED
 			self.delete_buttons[opponent].grid(row=i+1, column=3, padx=(5,0))
 
 class Game:
 	def __init__(self):
-		self.players = list()
 		self.get_players()
+		self.players_backup = copy.copy(self.players)
 
 		self.played_against = list()
 		self.played_start_idx = -1
 
 	def get_players(self):
-		# print("Enter identifier for other players:")
-		# self.players = dict()
-		# for i in range(7):
-		# 	self.players[i] = input("{}: ".format(i+1))
+		print("Enter identifier for other players:")
+		self.players = dict()
+		for i in range(7):
+			self.players[i] = input("{}: ".format(i+1))
 
-		self.players = {1: "a", 2: "b", 3: "c", 4: "d", 5: "e", 6: "f", 7: "g"}
+		# self.players = {1: "a", 2: "b", 3: "c", 4: "d", 5: "e", 6: "f", 7: "g"}
 
 	def reset(self):
 		self.played_against = list()
 		self.played_start_idx = -1
 
-	def played(self, player_idx):
-		print("PLAYED AGAINST: ", self.players[player_idx])
+	def revive_all(self):
+		self.players = copy.copy(self.players_backup)
+		self.reset()
 
+	def played(self, player_idx):
 		if player_idx in self.played_against:
 			print("Error: This matchup should have been impossible. Ignoring entry...")
-			# TODO: Reset instead???
+			return
+		
+		remaining_players = len(self.players)
+		if remaining_players <= 1:
+			self.reset()
 			return
 
-		remaining_players = len(self.players)
+		# How many players are kept in the played buffer
+		#   depending on how many players are remaining.
+		PLAYED_LOGIC = {
+			7: 4, 6: 4, 5: 3, 
+			4: 2, 3: 2, 2: 1
+		}
+
 		self.played_start_idx += 1
-		if self.played_start_idx > remaining_players-4:
+		if self.played_start_idx > PLAYED_LOGIC[remaining_players]-1:
 			self.played_start_idx = 0
 		
 		if self.played_start_idx + 1 > len(self.played_against):
@@ -107,12 +127,18 @@ class Game:
 				break
 
 	def get_played_opponents(self):
-		print("PLAYED: ", self.played_against)
-		return self.played_against
+		ret = list()
+		len_ = len(self.played_against)
+		print(self.played_against)
+		for i in range(len_):
+			next_idx = self.played_start_idx - i
+			if next_idx < 0:
+				next_idx += len_
+			ret.append(self.played_against[next_idx])
+		return ret
 
 	def get_possible_opponents(self):
 		possible_opponents = [player_idx for player_idx in self.players.keys() if player_idx not in self.played_against]
-		print("POSSIBLE: ", possible_opponents)
 		return possible_opponents
 
 def main():
