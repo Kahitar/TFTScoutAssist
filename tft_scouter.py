@@ -6,9 +6,6 @@ class GameFrame(tk.Frame):
 		
 		self.game = game
 
-		self.buttons_frame = tk.Frame(self)
-		self.buttons_frame.grid(row=0, column=0)
-
 		self.info_frame = tk.Frame(self)
 		self.info_frame.grid(row=0, column=1)
 
@@ -19,24 +16,12 @@ class GameFrame(tk.Frame):
 		self.player_buttons = dict()
 		self.delete_buttons = dict()
 		for i, (player_idx, player_name) in enumerate(self.game.players.items()):
-			self.player_buttons[player_idx] = tk.Button(self.buttons_frame, text=player_name, command=lambda player_idx=player_idx: self.played_player(player_idx))
-			self.player_buttons[player_idx].grid(row=i, column=0)
-
-			self.delete_buttons[player_idx] = tk.Button(self.buttons_frame, text="X", command=lambda player_idx=player_idx: self.delete_player(player_idx))
-			self.delete_buttons[player_idx].grid(row=i, column=1)
+			self.player_buttons[player_idx] = tk.Button(self.info_frame, text=player_name, command=lambda player_idx=player_idx: self.played_player(player_idx))
+			self.delete_buttons[player_idx] = tk.Button(self.info_frame, text="X", command=lambda player_idx=player_idx: self.delete_player(player_idx))
 
 		self.played_row_offset = 10
-		tk.Label(self.info_frame, text="POSSIBLE OPPONENTS:").grid(row=0, column=0)
-		tk.Label(self.info_frame, text="PLAYED OPPONENTS:").grid(row=self.played_row_offset, column=0)
-
-		self.possible_labels = list()
-		self.played_labels = list()
-		for i in range(7):
-			# Seven open labels
-			self.possible_labels.append(tk.Label(self.info_frame, text=""))
-			if i < 4:
-				# Four played labels
-				self.played_labels.append(tk.Label(self.info_frame, text=""))
+		tk.Label(self.info_frame, text="POSSIBLE OPPONENTS:").grid(row=0, column=0, columnspan=2)
+		tk.Label(self.info_frame, text="PLAYED OPPONENTS:").grid(row=self.played_row_offset, column=0, columnspan=2)
 
 		self.update_info()
 
@@ -62,20 +47,20 @@ class GameFrame(tk.Frame):
 		self.update_info()
 
 	def update_info(self):
-		for label in self.possible_labels:
-			label.grid_forget()
-			
-		for label in self.played_labels:
-			label.grid_forget()
+		for _, button in self.player_buttons.items():
+			button.grid_forget()
+
+		for _, button in self.delete_buttons.items():
+			button.grid_forget()
 
 		for i, opponent in enumerate(self.game.get_possible_opponents()):
-			self.possible_labels[i]["text"] = opponent
-			self.possible_labels[i].grid(row=i+1, column=0)
+			self.player_buttons[opponent].grid(row=i+1, column=0, sticky="nsew")
+			self.delete_buttons[opponent].grid(row=i+1, column=1)
 
 		for i, opponent in enumerate(self.game.get_played_opponents()):
 			row_idx = self.played_row_offset + 1 + i
-			self.played_labels[i]["text"] = opponent
-			self.played_labels[i].grid(row=row_idx, column=0)
+			self.player_buttons[opponent].grid(row=row_idx, column=0, sticky="nsew")
+			self.delete_buttons[opponent].grid(row=row_idx, column=1)
 
 class Game:
 	def __init__(self):
@@ -124,16 +109,11 @@ class Game:
 				break
 
 	def get_played_opponents(self):
-		ret = [self.players[player_idx] for player_idx in self.played_against]
-		print("PLAYED: ", ret)
-		return ret
+		print("PLAYED: ", self.played_against)
+		return self.played_against
 
 	def get_possible_opponents(self):
-		possible_opponents = list()
-		for player_idx, player_name in self.players.items():
-			if player_idx not in self.played_against:
-				possible_opponents.append(player_name)
-
+		possible_opponents = [player_idx for player_idx in self.players.keys() if player_idx not in self.played_against]
 		print("POSSIBLE: ", possible_opponents)
 		return possible_opponents
 
