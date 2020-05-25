@@ -6,22 +6,21 @@ class GameFrame(tk.Frame):
 		
 		self.game = game
 
-		self.info_frame = tk.Frame(self)
-		self.info_frame.grid(row=0, column=1)
+		self.main_frame = tk.Frame(self)
+		self.main_frame.grid(row=0, column=0)
 
 		self.options_frame = tk.Frame(self)
-		self.options_frame.grid(row=1, column=0, columnspan=2)
+		self.options_frame.grid(row=1, column=0)
 		tk.Button(self.options_frame, text="Reset", command=self.reset).grid(row=0, column=0)
 
 		self.player_buttons = dict()
 		self.delete_buttons = dict()
 		for i, (player_idx, player_name) in enumerate(self.game.players.items()):
-			self.player_buttons[player_idx] = tk.Button(self.info_frame, text=player_name, command=lambda player_idx=player_idx: self.played_player(player_idx))
-			self.delete_buttons[player_idx] = tk.Button(self.info_frame, text="X", command=lambda player_idx=player_idx: self.delete_player(player_idx))
+			self.player_buttons[player_idx] = tk.Button(self.main_frame, text=player_name, command=lambda player_idx=player_idx: self.played_player(player_idx))
+			self.delete_buttons[player_idx] = tk.Button(self.main_frame, text="X", bg="red", command=lambda player_idx=player_idx: self.delete_player(player_idx))
 
-		self.played_row_offset = 10
-		tk.Label(self.info_frame, text="POSSIBLE OPPONENTS:").grid(row=0, column=0, columnspan=2)
-		tk.Label(self.info_frame, text="PLAYED OPPONENTS:").grid(row=self.played_row_offset, column=0, columnspan=2)
+		tk.Label(self.main_frame, text="POSSIBLE OPPONENTS:", bg="#99ff99").grid(row=0, column=0, columnspan=2, sticky="nsew")
+		tk.Label(self.main_frame, text="LAST PLAYED:", bg="#99ff99").grid(row=0, column=2, columnspan=2, sticky="nsew", padx=(5,0))
 
 		self.update_info()
 
@@ -58,9 +57,8 @@ class GameFrame(tk.Frame):
 			self.delete_buttons[opponent].grid(row=i+1, column=1)
 
 		for i, opponent in enumerate(self.game.get_played_opponents()):
-			row_idx = self.played_row_offset + 1 + i
-			self.player_buttons[opponent].grid(row=row_idx, column=0, sticky="nsew")
-			self.delete_buttons[opponent].grid(row=row_idx, column=1)
+			self.player_buttons[opponent].grid(row=i+1, column=2, sticky="nsew", padx=(5,0))
+			self.delete_buttons[opponent].grid(row=i+1, column=3, padx=(5,0))
 
 class Game:
 	def __init__(self):
@@ -71,12 +69,12 @@ class Game:
 		self.played_start_idx = -1
 
 	def get_players(self):
-		print("Enter identifier for other players:")
-		self.players = dict()
-		for i in range(7):
-			self.players[i] = input("{}: ".format(i+1))
+		# print("Enter identifier for other players:")
+		# self.players = dict()
+		# for i in range(7):
+		# 	self.players[i] = input("{}: ".format(i+1))
 
-		# self.players = {1: "a", 2: "b", 3: "c", 4: "d", 5: "e", 6: "f", 7: "g"}
+		self.players = {1: "a", 2: "b", 3: "c", 4: "d", 5: "e", 6: "f", 7: "g"}
 
 	def reset(self):
 		self.played_against = list()
@@ -122,8 +120,12 @@ def main():
 	game = Game()
 
 	root = tk.Tk()
+	root.geometry("300x250")
+	root.title("TFT Scouter Assistent")
+	root.grid_columnconfigure(0, weight=1)
+
 	gameFrame = GameFrame(root, game)
-	gameFrame.grid(row=0, column=0)
+	gameFrame.grid(row=0, column=0, sticky="nsew")
 
 	root.mainloop()
 
