@@ -13,15 +13,19 @@ class GameFrame(tk.Frame):
 		self.game = game
 		self.parent = parent
 
-		self.main_frame = tk.Frame(self, height=210, width=250, bg="orange")
+		self.main_frame = tk.Frame(self, bg="orange", height=225, width=280)
 		self.main_frame.grid(row=0, column=0, sticky="nsew", padx=(5,0), pady=(5,0))
 		self.main_frame.grid_propagate(False)
 
-		self.options_frame = tk.Frame(self, bg="red")
-		self.options_frame.grid(row=1, column=0, sticky="nsew", padx=(5,0), pady=(5,0))
-		tk.Button(self.options_frame, text="Reset played", command=self.reset).grid(row=0, column=0)
-		tk.Button(self.options_frame, text="Revive all", command=self.revive_all).grid(row=0, column=1)
-		tk.Button(self.options_frame, text="Next Game", command=self.end_game).grid(row=0, column=2, padx=(45,0))
+		self.options_frame = tk.Frame(self, bg="orange")
+		self.options_frame.grid(row=0, column=1, sticky="nsew", padx=(5,5), pady=(5,0))
+		self.options_frame.grid_rowconfigure(0,weight=0)
+		self.options_frame.grid_rowconfigure(1,weight=0)
+		self.options_frame.grid_rowconfigure(2,weight=1)
+		tk.Label(self.options_frame, text="Options", bg="#99ff99", width=5).grid(row=0, column=0, sticky="new", padx=5, pady=5)
+		tk.Button(self.options_frame, text="Reset played", command=self.reset).grid(row=1, column=0, sticky="new", padx=5, pady=0)
+		tk.Button(self.options_frame, text="Revive all", command=self.revive_all).grid(row=2, column=0, sticky="new", padx=5, pady=5)
+		tk.Button(self.options_frame, text="Next Game", command=self.end_game, bg="#ff5555").grid(row=3, column=0, sticky="nsew", padx=5, pady=5)
 
 		self.player_buttons = dict()
 		self.delete_buttons = dict()
@@ -29,8 +33,8 @@ class GameFrame(tk.Frame):
 			self.player_buttons[player_idx] = tk.Button(self.main_frame, text=player_name, command=lambda player_idx=player_idx: self.played_player(player_idx))
 			self.delete_buttons[player_idx] = tk.Button(self.main_frame, text="X", bg="red", command=lambda player_idx=player_idx: self.delete_player(player_idx))
 
-		tk.Label(self.main_frame, text="POSSIBLE OPPONENTS", bg="#99ff99").grid(row=0, column=0, columnspan=2, sticky="nsew")
-		tk.Label(self.main_frame, text="LAST PLAYED", bg="#99ff99").grid(row=0, column=2, columnspan=2, sticky="nsew", padx=(5,0))
+		tk.Label(self.main_frame, text="Possible opponents", bg="#99ff99", width=18).grid(row=0, column=0, columnspan=2, sticky="nsew", padx=(5,0), pady=(5,5))
+		tk.Label(self.main_frame, text="Last played", bg="#99ff99", width=18).grid(row=0, column=2, columnspan=2, sticky="nsew", padx=(5,5), pady=(5,5))
 
 		self.update_info()
 
@@ -66,12 +70,12 @@ class GameFrame(tk.Frame):
 			button.grid_forget()
 
 		for i, opponent in enumerate(self.game.get_possible_opponents()):
-			self.player_buttons[opponent].grid(row=i+1, column=0, sticky="nsew")
+			self.player_buttons[opponent].grid(row=i+1, column=0, sticky="nsew", padx=(10,0), pady=(0,1))
 			self.player_buttons[opponent]["state"] = tk.NORMAL
 			self.delete_buttons[opponent].grid(row=i+1, column=1)
 
 		for i, opponent in enumerate(self.game.get_played_opponents()):
-			self.player_buttons[opponent].grid(row=i+1, column=2, sticky="nsew", padx=(5,0))
+			self.player_buttons[opponent].grid(row=i+1, column=2, sticky="nsew", padx=(10,0), pady=(0,1))
 			self.player_buttons[opponent]["state"] = tk.DISABLED
 			self.delete_buttons[opponent].grid(row=i+1, column=3, padx=(5,0))
 
@@ -156,9 +160,9 @@ class PlayerSelectionFrame(tk.Frame):
 		tk.Label(self, text="Enter opponent names", bg="#99ff99").grid(row=0, column=0, columnspan=2, sticky="nsew", pady=(3,5))
 
 		for i in range(7):
-			tk.Label(self, text="Player {}:".format(i+1)).grid(row=i+1, column=0, padx=3, pady=3)
+			tk.Label(self, text="Player {}:".format(i+1)).grid(row=i+1, column=0, padx=3, pady=2)
 			self.stringVars.append(tk.StringVar(self))
-			tk.Entry(self, textvariable=self.stringVars[-1]).grid(row=i+1, column=1, pady=3)
+			tk.Entry(self, textvariable=self.stringVars[-1]).grid(row=i+1, column=1, pady=2)
 
 		tk.Button(self, text="Start Game", command=self.start_game).grid(row=8, column=1)
 
@@ -187,8 +191,7 @@ class Game(tk.Tk):
 		self.window_menu.add_checkbutton(label="Always on top", onvalue=1, offvalue=0, variable=self.always_on_top)
 		self.menubar.add_cascade(label="Window", menu=self.window_menu)
 
-		self.geometry("260x250")
-		self.minsize(260, 250)
+		self.minsize(382, 235)
 		self.title("TFT Scouter Assistent")
 
 		self.stage = 0
