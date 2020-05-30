@@ -147,7 +147,7 @@ class PlayerSelectionFrame(tk.Frame):
 		self.setup_frame()
 
 	def setup_frame(self):
-		tk.Label(self, text="Enter player names:", bg="#99ff99").grid(row=0, column=0, columnspan=2, sticky="nsew", pady=(3,5))
+		tk.Label(self, text="Enter opponent names", bg="#99ff99").grid(row=0, column=0, columnspan=2, sticky="nsew", pady=(3,5))
 
 		for i in range(7):
 			tk.Label(self, text="Player {}:".format(i+1)).grid(row=i+1, column=0, padx=3, pady=3)
@@ -168,9 +168,18 @@ class Game(tk.Tk):
 		super().__init__()
 
 		self.grid_columnconfigure(0, weight=1)
-
 		self.grid_rowconfigure(0, weight=1)
 		self.grid_rowconfigure(1, weight=0)
+
+		self.always_on_top = tk.BooleanVar()
+		self.always_on_top.set(False)
+		self.always_on_top.trace_add('write', lambda x, y, z: self.set_always_on_top()) 
+
+		self.menubar = tk.Menu(self)
+		self.config(menu=self.menubar)
+		self.window_menu = tk.Menu(self.menubar, tearoff=0)
+		self.window_menu.add_checkbutton(label="Always on top", onvalue=1, offvalue=0, variable=self.always_on_top)
+		self.menubar.add_cascade(label="Window", menu=self.window_menu)
 
 		self.geometry("260x250")
 		self.minsize(260, 250)
@@ -197,6 +206,10 @@ class Game(tk.Tk):
 		gameLogic = GameLogic(self.players)
 		gameFrame = GameFrame(self, gameLogic)
 		gameFrame.grid(row=0, column=0, sticky="nsew")
+
+
+	def set_always_on_top(self):
+		self.wm_attributes("-topmost", self.always_on_top.get())
 
 
 def main():
