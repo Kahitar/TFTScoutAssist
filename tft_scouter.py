@@ -1,5 +1,6 @@
 import copy
 import tkinter as tk
+from tkinter import messagebox
 
 class CircularBuffer():
 	def __init__(self):
@@ -10,6 +11,7 @@ class GameFrame(tk.Frame):
 		super().__init__(parent)
 		
 		self.game = game
+		self.parent = parent
 
 		self.main_frame = tk.Frame(self, height=210, width=250, bg="orange")
 		self.main_frame.grid(row=0, column=0, sticky="nsew", padx=(5,0), pady=(5,0))
@@ -19,7 +21,7 @@ class GameFrame(tk.Frame):
 		self.options_frame.grid(row=1, column=0, sticky="nsew", padx=(5,0), pady=(5,0))
 		tk.Button(self.options_frame, text="Reset played", command=self.reset).grid(row=0, column=0)
 		tk.Button(self.options_frame, text="Revive all", command=self.revive_all).grid(row=0, column=1)
-		tk.Button(self.options_frame, text="Next Game", command=parent.next_stage).grid(row=0, column=2, padx=(45,0))
+		tk.Button(self.options_frame, text="Next Game", command=self.end_game).grid(row=0, column=2, padx=(45,0))
 
 		self.player_buttons = dict()
 		self.delete_buttons = dict()
@@ -51,6 +53,10 @@ class GameFrame(tk.Frame):
 	def revive_all(self):
 		self.game.revive_all()
 		self.update_info()
+
+	def end_game(self):
+		if messagebox.askokcancel("Start new game?", " Are you sure you want to start a new game? \nAll the player names will be deleted."):
+			self.parent.next_stage()
 
 	def update_info(self):
 		for _, button in self.player_buttons.items():
