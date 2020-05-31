@@ -1,2 +1,10 @@
 # Specify filepatterns you want git to ignore.
-venv/
+
+# Python
+env/
+*.pyc
+
+# PyInstaller
+build/
+dist/
+*.spec
