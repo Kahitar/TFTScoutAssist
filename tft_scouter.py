@@ -17,10 +17,6 @@ class GameFrame(tk.Frame):
 		self.main_frame.grid(row=0, column=0, sticky="nsew", padx=(5,0), pady=(5,0))
 		self.main_frame.grid_propagate(False)
 
-		self.always_on_top = tk.BooleanVar()
-		self.always_on_top.set(False)
-		self.always_on_top.trace_add('write', lambda x, y, z: parent.set_always_on_top(self.always_on_top.get()))
-
 		self.options_frame = tk.Frame(self, bg="orange")
 		self.options_frame.grid(row=0, column=1, sticky="nsew", padx=(5,5), pady=(5,0))
 		self.options_frame.grid_rowconfigure(0,weight=0)
@@ -28,7 +24,7 @@ class GameFrame(tk.Frame):
 		self.options_frame.grid_rowconfigure(2,weight=0)
 		self.options_frame.grid_rowconfigure(3,weight=0)
 		tk.Label(self.options_frame, text="Options", bg="#99ff99", width=5).grid(row=0, column=0, sticky="new", padx=5, pady=5)
-		tk.Checkbutton(self.options_frame, text="Always on top", variable=self.always_on_top).grid(row=1, column=0, sticky="new", padx=5, pady=0)
+		tk.Checkbutton(self.options_frame, text="Always on top", variable=parent.always_on_top).grid(row=1, column=0, sticky="new", padx=5, pady=0)
 		tk.Button(self.options_frame, text="Reset played", command=self.reset).grid(row=2, column=0, sticky="nsew", padx=5, pady=(5,0))
 		tk.Button(self.options_frame, text="Revive all", command=self.revive_all).grid(row=3, column=0, sticky="nsew", padx=5, pady=(5,0))
 		tk.Button(self.options_frame, text="Next Game", command=self.end_game, bg="#ff5555").grid(row=4, column=0, sticky="nsew", padx=5, pady=5)
@@ -190,6 +186,10 @@ class Game(tk.Tk):
 		self.minsize(408, 235)
 		self.title("TFT Scouter Assistent")
 
+		self.always_on_top = tk.BooleanVar()
+		self.always_on_top.set(False)
+		self.always_on_top.trace_add('write', lambda x, y, z: self.set_always_on_top(self.always_on_top.get()))
+
 		self.stage = 0
 		self.next_stage()
 
@@ -211,7 +211,6 @@ class Game(tk.Tk):
 		gameLogic = GameLogic(self.players)
 		gameFrame = GameFrame(self, gameLogic)
 		gameFrame.grid(row=0, column=0, sticky="nsew")
-
 
 	def set_always_on_top(self, is_always_on_top):
 		self.wm_attributes("-topmost", is_always_on_top)
