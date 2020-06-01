@@ -104,7 +104,7 @@ class GameLogic:
 	# How many players are kept in the played buffer
 	#   depending on how many players are remaining.
 	PLAYED_LOGIC = { # remaining : played buffer
-		7: 4, 6: 4, 5: 3, 
+		7: 4, 6: 3, 5: 3, 
 		4: 2, 3: 2, 2: 1
 	}
 
