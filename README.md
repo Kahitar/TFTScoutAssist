@@ -38,7 +38,7 @@ A small python tkinter app for the game Teamfight Tactics from Riot Games to hel
 
 ## <a name="installation"></a>Installation
 
-1. Download this script  [here](https://github.com/Kahitar/TFTScoutAssist/archive/master.zip) (Or by clicking "Clone or Download" -> "Download ZIP" on the right above the file list).
+1. Download this script  [here](https://github.com/Kahitar/TFTScoutAssist/archive/master.zip) (Or by clicking "Code" -> "Download ZIP" on the right above the file list).
 2. Unzip to any folder you like.
 3. Install python using the Microsoft Store (Windows 10): [Link](https://www.microsoft.com/store/productId/9NJ46SX7X90P)
 	- I didn't test this App on Apple OS and have no idea if it works there and how to install python. If you have success using it there, feel free to tell me how and I'll add instructions here.
