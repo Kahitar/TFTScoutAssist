@@ -7,6 +7,11 @@ class GameFrame(tk.Frame):
 		super().__init__(master, bg="orange", height=225, width=280)
 
 		self.gameLogic = gameLogic
+		self.active = True
+
+		self.label_inactive = tk.Label(self, text="3 players left, everyone can play everyone", bg="#ff5555", width=36)
+		self.label_possible = tk.Label(self, text="Possible opponents", bg="#99ff99", width=18)
+		self.label_played = tk.Label(self, text="Last played", bg="#99ff99", width=18)
 
 		self.player_buttons = dict()
 		self.delete_buttons = dict()
@@ -20,8 +25,7 @@ class GameFrame(tk.Frame):
 			self.player_buttons[player_idx] = tk.Button(self, text=player_name, command=lambda player_idx=player_idx: self.played_player(player_idx))
 			self.delete_buttons[player_idx] = tk.Button(self, text="X", bg="red", command=lambda player_idx=player_idx: self.delete_player(player_idx))
 
-		tk.Label(self, text="Possible opponents", bg="#99ff99", width=18).grid(row=0, column=0, columnspan=2, sticky="nsew", padx=(5,0), pady=(5,5))
-		tk.Label(self, text="Last played", bg="#99ff99", width=18).grid(row=0, column=2, columnspan=2, sticky="nsew", padx=(5,5), pady=(5,5))
+		self.set_active()
 
 		self.update_played()
 
@@ -37,13 +41,36 @@ class GameFrame(tk.Frame):
 		
 		self.update_played()
 
+	def set_active(self):
+		self.label_inactive.grid_forget()
+
+		self.label_possible.grid(row=0, column=0, columnspan=2, sticky="nsew", padx=(5,0), pady=(5,5))
+		self.label_played.grid(row=0, column=2, columnspan=2, sticky="nsew", padx=(5,5), pady=(5,5))
+		self.active = True
+	
+	def set_inactive(self):
+		self.label_possible.grid_forget()
+		self.label_played.grid_forget()
+
+		self.label_inactive.grid(row=0, column=0, columnspan=4, sticky="nsew", padx=(5,0), pady=(5,5))
+		self.active = False
+
 	def update_played(self):
 		self.forget_buttons()
 
+		button_states = tk.NORMAL
+		if len(self.gameLogic.players) <= 2:
+			button_states = tk.DISABLED
+			if self.active:
+				self.set_inactive()
+		elif not self.active:
+			self.set_active()
+
 		for i, opponent in enumerate(self.gameLogic.get_possible_opponents()):
 			self.player_buttons[opponent].grid(row=i+1, column=0, sticky="nsew", padx=(10,0), pady=(0,1))
-			self.player_buttons[opponent]["state"] = tk.NORMAL
+			self.player_buttons[opponent]["state"] = button_states
 			self.delete_buttons[opponent].grid(row=i+1, column=1)
+			self.delete_buttons[opponent]["state"] = button_states
 
 		for i, opponent in enumerate(self.gameLogic.get_played_opponents()):
 			self.player_buttons[opponent].grid(row=i+1, column=2, sticky="nsew", padx=(10,0), pady=(0,1))
@@ -105,7 +132,7 @@ class GameLogic:
 	#   depending on how many players are remaining.
 	PLAYED_LOGIC = { # remaining : played buffer
 		7: 4, 6: 3, 5: 2, 
-		4: 2, 3: 2, 2: 1
+		4: 2, 3: 1, 2: 0
 	}
 
 	def __init__(self):
@@ -134,7 +161,7 @@ class GameLogic:
 			return
 		
 		remaining_players = len(self.players)
-		if remaining_players <= 1:
+		if remaining_players <= 2:
 			self.reset()
 			return
 
