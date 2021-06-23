@@ -43,6 +43,8 @@ A small python tkinter app for the game Teamfight Tactics from Riot Games to hel
 2. Run the executable.
 	- Windows will warn you of a security risk. There is no actual security risk in running this executable, but if you don't trust in this statement (in general you shouldn't trust random software from the internet), use Option 2 (below) to run this program.
 
+	![Run despite windows warning](./res/run_exe_windows_warning.png)
+
 #### Option 2 (Run source code directly; advanced):
 1. Download this script  [here](https://github.com/Kahitar/TFTScoutAssist/archive/master.zip) (Or by clicking "Code" -> "Download ZIP" on the right above the file list).
 2. Unzip to any folder you like.
